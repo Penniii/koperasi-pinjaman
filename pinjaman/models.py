@@ -116,3 +116,32 @@ class Pinjaman(models.Model):
 
     def __str__(self):
         return f"{self.no_pinjaman} - {self.pengajuan.anggota.nama_lengkap}"
+
+class JadwalAngsuran(models.Model):
+    class Status(models.TextChoices):
+        BELUM = "belum", "Belum dibayar"
+        LUNAS = "lunas", "Lunas"
+
+    pinjaman = models.ForeignKey(Pinjaman, on_delete=models.PROTECT, related_name="jadwal")
+    angsuran_ke = models.PositiveSmallIntegerField()
+    jatuh_tempo = models.DateField()
+    pokok = models.DecimalField(max_digits=15, decimal_places=2)
+    jasa = models.DecimalField(max_digits=15, decimal_places=2)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.BELUM)
+
+    class Meta:
+        verbose_name = "Jadwal angsuran"
+        verbose_name_plural = "Jadwal angsuran"
+        ordering = ["pinjaman_id", "angsuran_ke"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["pinjaman", "angsuran_ke"], name="angsuran_unik_per_pinjaman"
+            )
+        ]
+
+    @property
+    def total(self):
+        return self.pokok + self.jasa
+
+    def __str__(self):
+        return f"{self.pinjaman.no_pinjaman} angsuran ke-{self.angsuran_ke}"

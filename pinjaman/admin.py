@@ -4,7 +4,8 @@ from django.contrib import admin, messages
 from django.db import transaction
 from django.utils import timezone
 
-from .models import JenisPinjaman, Pinjaman, PengajuanPinjaman
+from .models import JadwalAngsuran, JenisPinjaman, Pinjaman, PengajuanPinjaman
+from .services import buat_jadwal_angsuran
 
 
 @admin.register(JenisPinjaman)
@@ -48,7 +49,7 @@ class PengajuanPinjamanAdmin(admin.ModelAdmin):
                 status=PengajuanPinjaman.Status.DISETUJUI
             ).select_for_update():
                 jenis = pengajuan.jenis
-                Pinjaman.objects.create(
+                pinjaman = Pinjaman.objects.create(
                     pengajuan=pengajuan,
                     tanggal_cair=timezone.localdate(),
                     pokok=pengajuan.jumlah,
@@ -60,10 +61,22 @@ class PengajuanPinjamanAdmin(admin.ModelAdmin):
                     denda_per_hari_persen=jenis.denda_per_hari_persen,
                     dicairkan_oleh=request.user,
                 )
+                buat_jadwal_angsuran(pinjaman)
                 pengajuan.status = PengajuanPinjaman.Status.DICAIRKAN
                 pengajuan.save(update_fields=["status"])
                 jumlah += 1
         self.message_user(request, f"{jumlah} pinjaman dicairkan.", messages.SUCCESS)
+
+
+class JadwalAngsuranInline(admin.TabularInline):
+    model = JadwalAngsuran
+    extra = 0
+    fields = ("angsuran_ke", "jatuh_tempo", "pokok", "jasa", "total", "status")
+    readonly_fields = fields
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Pinjaman)
@@ -71,6 +84,7 @@ class PinjamanAdmin(admin.ModelAdmin):
     list_display = ("no_pinjaman", "pengajuan", "tanggal_cair", "pokok", "tenor_bulan", "status")
     list_filter = ("status",)
     search_fields = ("no_pinjaman", "pengajuan__anggota__nama_lengkap")
+    inlines = [JadwalAngsuranInline]
 
     # Pinjaman hanya lahir lewat aksi "Cairkan" dan tidak boleh diedit/dihapus manual
     def has_add_permission(self, request):
