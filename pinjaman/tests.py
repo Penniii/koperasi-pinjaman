@@ -20,6 +20,7 @@ from .services import (
     hitung_denda,
     hitung_hari_telat,
     hitung_jadwal_flat,
+    kolektibilitas,
     tambah_bulan,
 )
 
@@ -137,3 +138,12 @@ class AlurPembayaranTest(TestCase):
             for k in TransaksiKas.objects.filter(kategori=TransaksiKas.Kategori.ANGSURAN_POKOK)
         )
         self.assertEqual(total_pokok, Decimal("1200000"))
+
+class KolektibilitasTest(SimpleTestCase):
+    def test_tingkat_kolektibilitas(self):
+        self.assertEqual(kolektibilitas(0), "Lancar")
+        self.assertEqual(kolektibilitas(1), "Terlambat")
+        self.assertEqual(kolektibilitas(30), "Terlambat")
+        self.assertEqual(kolektibilitas(31), "Kurang lancar")
+        self.assertEqual(kolektibilitas(90), "Kurang lancar")
+        self.assertEqual(kolektibilitas(91), "Macet")

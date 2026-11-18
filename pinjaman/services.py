@@ -115,3 +115,12 @@ def catat_kas_pencairan(pinjaman, petugas):
                 pinjaman=pinjaman,
                 dibuat_oleh=petugas,
             )
+def kolektibilitas(hari_telat):
+    """Tingkat kualitas pinjaman berdasarkan lama keterlambatan."""
+    if hari_telat <= 0:
+        return "Lancar"
+    if hari_telat <= 30:
+        return "Terlambat"
+    if hari_telat <= 90:
+        return "Kurang lancar"
+    return "Macet"

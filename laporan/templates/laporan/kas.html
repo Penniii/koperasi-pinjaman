@@ -1,0 +1,44 @@
+{% extends "laporan/base.html" %}
+{% load rupiah %}
+{% block title %}Laporan Kas{% endblock %}
+{% block isi %}
+<h1>Laporan Kas</h1>
+
+<form method="get" class="filter">
+  <label>Dari <input type="date" name="dari" value="{{ dari|date:'Y-m-d' }}"></label>
+  <label>Sampai <input type="date" name="sampai" value="{{ sampai|date:'Y-m-d' }}"></label>
+  <button type="submit">Tampilkan</button>
+</form>
+
+<div class="kartu-grid">
+  <div class="kartu"><div class="label">Saldo awal</div><div class="nilai">{{ saldo_awal|rupiah }}</div></div>
+  <div class="kartu"><div class="label">Total kas masuk</div><div class="nilai">{{ total_masuk|rupiah }}</div></div>
+  <div class="kartu"><div class="label">Total kas keluar</div><div class="nilai">{{ total_keluar|rupiah }}</div></div>
+  <div class="kartu"><div class="label">Saldo akhir</div><div class="nilai">{{ saldo_akhir|rupiah }}</div></div>
+</div>
+
+<section>
+  <h2>Rincian transaksi</h2>
+  {% if baris %}
+  <table>
+    <thead>
+      <tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="angka">Masuk</th><th class="angka">Keluar</th><th class="angka">Saldo</th></tr>
+    </thead>
+    <tbody>
+      {% for b in baris %}
+      <tr>
+        <td>{{ b.transaksi.tanggal|date:"d M Y" }}</td>
+        <td>{{ b.transaksi.get_kategori_display }}</td>
+        <td>{{ b.transaksi.keterangan }}</td>
+        <td class="angka">{% if b.masuk %}{{ b.masuk|rupiah }}{% endif %}</td>
+        <td class="angka">{% if b.keluar %}{{ b.keluar|rupiah }}{% endif %}</td>
+        <td class="angka">{{ b.saldo|rupiah }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="kosong">Tidak ada transaksi pada periode ini.</p>
+  {% endif %}
+</section>
+{% endblock %}

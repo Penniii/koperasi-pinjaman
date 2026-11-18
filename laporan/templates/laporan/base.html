@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Laporan{% endblock %} - Koperasi Pinjaman</title>
+  <style>
+    :root { --bg:#f5f7fa; --kartu:#fff; --teks:#1f2937; --redup:#6b7280; --garis:#e5e7eb; --utama:#0f766e; --bahaya:#b91c1c; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--teks); }
+    header { background:var(--utama); color:#fff; padding:0 24px; display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+    header strong { font-size:18px; padding:14px 0; }
+    nav a { color:#e6fffa; text-decoration:none; padding:16px 12px; display:inline-block; }
+    nav a.aktif, nav a:hover { background:rgba(255,255,255,.15); color:#fff; }
+    main { max-width:1100px; margin:24px auto; padding:0 16px; }
+    h1 { font-size:22px; margin:0 0 16px; }
+    .kartu-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:24px; }
+    .kartu { background:var(--kartu); border:1px solid var(--garis); border-radius:10px; padding:16px; }
+    .kartu .label { color:var(--redup); font-size:13px; }
+    .kartu .nilai { font-size:22px; font-weight:600; margin-top:4px; }
+    .bahaya { color:var(--bahaya); }
+    section { background:var(--kartu); border:1px solid var(--garis); border-radius:10px; padding:16px; margin-bottom:24px; overflow-x:auto; }
+    section h2 { font-size:16px; margin:0 0 12px; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--garis); white-space:nowrap; }
+    th { color:var(--redup); font-weight:600; font-size:12px; text-transform:uppercase; }
+    td.angka, th.angka { text-align:right; }
+    tfoot td { font-weight:600; border-bottom:0; }
+    .kosong { color:var(--redup); margin:0; }
+    form.filter { display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin-bottom:16px; }
+    form.filter label { display:flex; flex-direction:column; font-size:13px; color:var(--redup); gap:4px; }
+    input[type=date] { padding:6px 8px; border:1px solid var(--garis); border-radius:6px; }
+    button { background:var(--utama); color:#fff; border:0; padding:8px 16px; border-radius:6px; cursor:pointer; }
+    .lencana { padding:2px 8px; border-radius:999px; font-size:12px; background:#fef3c7; color:#92400e; }
+    .lencana.macet { background:#fee2e2; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Koperasi Pinjaman</strong>
+    <nav>
+      <a href="{% url 'laporan:dashboard' %}" class="{% if halaman == 'dashboard' %}aktif{% endif %}">Dashboard</a>
+      <a href="{% url 'laporan:tunggakan' %}" class="{% if halaman == 'tunggakan' %}aktif{% endif %}">Tunggakan</a>
+      <a href="{% url 'laporan:kas' %}" class="{% if halaman == 'kas' %}aktif{% endif %}">Laporan Kas</a>
+      <a href="{% url 'admin:index' %}">Panel Admin</a>
+    </nav>
+  </header>
+  <main>
+    {% block isi %}{% endblock %}
+  </main>
+</body>
+</html>

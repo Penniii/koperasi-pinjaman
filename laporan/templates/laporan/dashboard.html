@@ -1,0 +1,43 @@
+{% extends "laporan/base.html" %}
+{% load rupiah %}
+{% block title %}Dashboard{% endblock %}
+{% block isi %}
+<h1>Dashboard</h1>
+
+<div class="kartu-grid">
+  <div class="kartu"><div class="label">Saldo kas</div><div class="nilai">{{ saldo_kas|rupiah }}</div></div>
+  <div class="kartu"><div class="label">Sisa pokok pinjaman beredar</div><div class="nilai">{{ sisa_pokok|rupiah }}</div></div>
+  <div class="kartu"><div class="label">Pinjaman berjalan</div><div class="nilai">{{ pinjaman_berjalan }}</div></div>
+  <div class="kartu"><div class="label">Anggota aktif</div><div class="nilai">{{ anggota_aktif }}</div></div>
+  <div class="kartu"><div class="label">Pengajuan menunggu keputusan</div><div class="nilai">{{ menunggu_keputusan }}</div></div>
+  <div class="kartu"><div class="label">Disetujui, siap dicairkan</div><div class="nilai">{{ siap_cair }}</div></div>
+  <div class="kartu">
+    <div class="label">Tunggakan ({{ tunggakan_jumlah }} angsuran)</div>
+    <div class="nilai {% if tunggakan_jumlah %}bahaya{% endif %}">{{ tunggakan_total|rupiah }}</div>
+  </div>
+</div>
+
+<section>
+  <h2>Jatuh tempo 7 hari ke depan</h2>
+  {% if jatuh_tempo %}
+  <table>
+    <thead>
+      <tr><th>Pinjaman</th><th>Anggota</th><th>Angsuran ke</th><th>Jatuh tempo</th><th class="angka">Jumlah</th></tr>
+    </thead>
+    <tbody>
+      {% for j in jatuh_tempo %}
+      <tr>
+        <td>{{ j.pinjaman.no_pinjaman }}</td>
+        <td>{{ j.pinjaman.pengajuan.anggota.nama_lengkap }}</td>
+        <td>{{ j.angsuran_ke }} dari {{ j.pinjaman.tenor_bulan }}</td>
+        <td>{{ j.jatuh_tempo|date:"d M Y" }}</td>
+        <td class="angka">{{ j.total|rupiah }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="kosong">Tidak ada angsuran yang jatuh tempo dalam 7 hari ke depan.</p>
+  {% endif %}
+</section>
+{% endblock %}

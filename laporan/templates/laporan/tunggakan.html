@@ -1,0 +1,41 @@
+{% extends "laporan/base.html" %}
+{% load rupiah %}
+{% block title %}Tunggakan{% endblock %}
+{% block isi %}
+<h1>Laporan Tunggakan</h1>
+<p class="kosong" style="margin-bottom:16px">Per {{ hari_ini|date:"d M Y" }}. Denda dihitung sampai hari ini.</p>
+
+<section>
+  {% if baris %}
+  <table>
+    <thead>
+      <tr>
+        <th>Pinjaman</th><th>Anggota</th><th>Angsuran ke</th><th>Jatuh tempo</th>
+        <th class="angka">Hari telat</th><th>Kolektibilitas</th>
+        <th class="angka">Angsuran</th><th class="angka">Denda</th><th class="angka">Total tagihan</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in baris %}
+      <tr>
+        <td>{{ b.jadwal.pinjaman.no_pinjaman }}</td>
+        <td>{{ b.jadwal.pinjaman.pengajuan.anggota.nama_lengkap }}</td>
+        <td>{{ b.jadwal.angsuran_ke }}</td>
+        <td>{{ b.jadwal.jatuh_tempo|date:"d M Y" }}</td>
+        <td class="angka">{{ b.hari_telat }}</td>
+        <td><span class="lencana {% if b.kolektibilitas == 'Macet' %}macet{% endif %}">{{ b.kolektibilitas }}</span></td>
+        <td class="angka">{{ b.jadwal.total|rupiah }}</td>
+        <td class="angka">{{ b.denda|rupiah }}</td>
+        <td class="angka">{{ b.tagihan|rupiah }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td colspan="8">Total tagihan</td><td class="angka">{{ total_tagihan|rupiah }}</td></tr>
+    </tfoot>
+  </table>
+  {% else %}
+  <p class="kosong">Tidak ada tunggakan. Semua angsuran lancar.</p>
+  {% endif %}
+</section>
+{% endblock %}
