@@ -67,6 +67,10 @@ class PengajuanPinjaman(models.Model):
         verbose_name = "Pengajuan pinjaman"
         verbose_name_plural = "Pengajuan pinjaman"
         ordering = ["-dibuat_pada"]
+        permissions = [
+            ("setujui_pengajuan", "Boleh menyetujui atau menolak pengajuan"),
+            ("cairkan_pinjaman", "Boleh mencairkan pinjaman"),
+        ]
 
     def clean(self):
         if self.anggota_id and self.anggota.status != Anggota.Status.AKTIF:
