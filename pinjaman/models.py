@@ -188,7 +188,9 @@ class Pembayaran(models.Model):
             raise ValidationError("Angsuran sebelumnya belum dibayar. Pembayaran harus berurutan.")
         if self.tanggal_bayar < jadwal.pinjaman.tanggal_cair:
             raise ValidationError("Tanggal bayar tidak boleh sebelum tanggal pencairan.")
-
+        if self.tanggal_bayar > timezone.localdate():
+            raise ValidationError("Tanggal bayar tidak boleh di masa depan.")
+        
     def save(self, *args, **kwargs):
         if self.pk:
             raise ValueError("Pembayaran tidak boleh diubah. Koreksi dibuat sebagai transaksi baru.")

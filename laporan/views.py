@@ -30,8 +30,9 @@ def dashboard(request):
     belum_bayar = JadwalAngsuran.objects.filter(status=JadwalAngsuran.Status.BELUM)
     menunggak = belum_bayar.filter(jatuh_tempo__lt=hari_ini)
 
-    kas_masuk = _jumlah(TransaksiKas.objects.filter(jenis=TransaksiKas.Jenis.MASUK), "jumlah")
-    kas_keluar = _jumlah(TransaksiKas.objects.filter(jenis=TransaksiKas.Jenis.KELUAR), "jumlah")
+    kas_sampai_hari_ini = TransaksiKas.objects.filter(tanggal__lte=hari_ini)
+    kas_masuk = _jumlah(kas_sampai_hari_ini.filter(jenis=TransaksiKas.Jenis.MASUK), "jumlah")
+    kas_keluar = _jumlah(kas_sampai_hari_ini.filter(jenis=TransaksiKas.Jenis.KELUAR), "jumlah")
 
     konteks = {
         "halaman": "dashboard",
