@@ -4,8 +4,8 @@ from django.contrib import admin, messages
 from django.db import transaction
 from django.utils import timezone
 
-from .models import JadwalAngsuran, JenisPinjaman, Pinjaman, PengajuanPinjaman
-from .services import buat_jadwal_angsuran
+from .models import JadwalAngsuran, JenisPinjaman, Pembayaran, Pinjaman, PengajuanPinjaman, TransaksiKas
+from .services import buat_jadwal_angsuran, catat_kas_pencairan
 
 
 @admin.register(JenisPinjaman)
@@ -62,6 +62,8 @@ class PengajuanPinjamanAdmin(admin.ModelAdmin):
                     dicairkan_oleh=request.user,
                 )
                 buat_jadwal_angsuran(pinjaman)
+                buat_jadwal_angsuran(pinjaman)
+                catat_kas_pencairan(pinjaman, request.user)
                 pengajuan.status = PengajuanPinjaman.Status.DICAIRKAN
                 pengajuan.save(update_fields=["status"])
                 jumlah += 1
@@ -90,6 +92,64 @@ class PinjamanAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(JadwalAngsuran)
+class JadwalAngsuranAdmin(admin.ModelAdmin):
+    list_display = ("pinjaman", "angsuran_ke", "jatuh_tempo", "pokok", "jasa", "status")
+    list_filter = ("status", "jatuh_tempo")
+    search_fields = ("pinjaman__no_pinjaman", "pinjaman__pengajuan__anggota__nama_lengkap")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Pembayaran)
+class PembayaranAdmin(admin.ModelAdmin):
+    list_display = ("id", "jadwal", "tanggal_bayar", "pokok", "jasa", "hari_telat", "denda", "total_dibayar")
+    search_fields = ("jadwal__pinjaman__no_pinjaman", "jadwal__pinjaman__pengajuan__anggota__nama_lengkap")
+    autocomplete_fields = ("jadwal",)
+    readonly_fields = ("pokok", "jasa", "hari_telat", "denda", "dicatat_oleh")
+
+    def get_fields(self, request, obj=None):
+        if obj:
+            return ("jadwal", "tanggal_bayar", "pokok", "jasa", "hari_telat", "denda", "dicatat_oleh")
+        return ("jadwal", "tanggal_bayar")  # kasir cukup isi dua kolom ini
+
+    def save_model(self, request, obj, form, change):
+        obj.dicatat_oleh = request.user
+        super().save_model(request, obj, form, change)
+
+    # Pembayaran yang sudah tercatat tidak boleh diubah atau dihapus
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(TransaksiKas)
+class TransaksiKasAdmin(admin.ModelAdmin):
+    list_display = ("tanggal", "jenis", "kategori", "jumlah", "keterangan")
+    list_filter = ("jenis", "kategori")
+    search_fields = ("keterangan",)
+    date_hierarchy = "tanggal"
+
+    def save_model(self, request, obj, form, change):
+        obj.dibuat_oleh = request.user
+        super().save_model(request, obj, form, change)
+
+    # Buku kas hanya boleh bertambah. Kesalahan dikoreksi dengan transaksi baru.
     def has_change_permission(self, request, obj=None):
         return False
 

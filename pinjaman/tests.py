@@ -25,4 +25,4 @@ class HitungJadwalFlatTest(SimpleTestCase):
     def test_jatuh_tempo_akhir_bulan(self):
         self.assertEqual(tambah_bulan(date(2026, 1, 31), 1), date(2026, 2, 28))
         self.assertEqual(tambah_bulan(date(2026, 1, 31), 2), date(2026, 3, 31))
-        self.assertEqual(tambah_bulan(date(2026, 11, 18), 3), date(2027, 2, 18))
+    self.assertEqual(tambah_bulan(date(2026, 11, 18), 3), date(2027, 2, 18))

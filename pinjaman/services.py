@@ -5,7 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 
-from .models import JadwalAngsuran
+from .models import JadwalAngsuran, TransaksiKas
 
 SEN = Decimal("0.01")
 
@@ -76,3 +76,42 @@ def buat_jadwal_angsuran(pinjaman):
                 for b in baris
             ]
         )
+
+def hitung_hari_telat(jatuh_tempo, tanggal_bayar):
+    """Bayar lebih awal atau tepat waktu = 0 hari telat (tidak pernah negatif)."""
+    return max(0, (tanggal_bayar - jatuh_tempo).days)
+
+
+def hitung_denda(total_angsuran, denda_per_hari_persen, hari_telat):
+    """Denda = total angsuran x persen denda per hari x jumlah hari telat."""
+    denda = Decimal(total_angsuran) * Decimal(denda_per_hari_persen) / 100 * hari_telat
+    return denda.quantize(SEN, ROUND_HALF_UP)
+
+
+def catat_kas_pencairan(pinjaman, petugas):
+    """Kas keluar sebesar pokok, kas masuk sebesar biaya admin. Aman dipanggil dua kali."""
+    with transaction.atomic():
+        sudah_ada = pinjaman.kas.filter(
+            kategori__in=[TransaksiKas.Kategori.PENCAIRAN, TransaksiKas.Kategori.BIAYA_ADMIN]
+        ).exists()
+        if sudah_ada:
+            return
+        TransaksiKas.objects.create(
+            tanggal=pinjaman.tanggal_cair,
+            jenis=TransaksiKas.Jenis.KELUAR,
+            kategori=TransaksiKas.Kategori.PENCAIRAN,
+            jumlah=pinjaman.pokok,
+            keterangan=f"Pencairan {pinjaman.no_pinjaman}",
+            pinjaman=pinjaman,
+            dibuat_oleh=petugas,
+        )
+        if pinjaman.biaya_admin > 0:
+            TransaksiKas.objects.create(
+                tanggal=pinjaman.tanggal_cair,
+                jenis=TransaksiKas.Jenis.MASUK,
+                kategori=TransaksiKas.Kategori.BIAYA_ADMIN,
+                jumlah=pinjaman.biaya_admin,
+                keterangan=f"Biaya admin {pinjaman.no_pinjaman}",
+                pinjaman=pinjaman,
+                dibuat_oleh=petugas,
+            )
