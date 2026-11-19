@@ -1,5 +1,7 @@
 # Koperasi Pinjaman
 
+**Demo online:** https://penni.pythonanywhere.com (login: `kasir` atau `pengurus`, password `demo12345`)
+
 Aplikasi web untuk mengelola pinjaman koperasi: pengajuan, persetujuan, pencairan, jadwal angsuran,
 pembayaran dengan denda otomatis, buku kas, dan laporan. Dibuat sebagai proyek portfolio.
 
