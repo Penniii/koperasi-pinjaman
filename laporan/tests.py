@@ -25,3 +25,28 @@ class AksesHalamanTest(TestCase):
         self.client.force_login(staf)
         for alamat in ["/laporan/", "/laporan/tunggakan/", "/laporan/kas/"]:
             self.assertEqual(self.client.get(alamat).status_code, 200, alamat)
+
+class MasukKeluarTest(TestCase):
+    def setUp(self):
+        self.staf = get_user_model().objects.create_user(
+            "staf", password="rahasia123", is_staff=True
+        )
+
+    def test_belum_login_dialihkan_ke_halaman_masuk(self):
+        respons = self.client.get("/laporan/")
+        self.assertRedirects(respons, "/laporan/masuk/?next=/laporan/")
+
+    def test_login_berhasil_menuju_dashboard(self):
+        respons = self.client.post(
+            "/laporan/masuk/", {"username": "staf", "password": "rahasia123"}
+        )
+        self.assertRedirects(respons, "/laporan/")
+
+    def test_login_salah_tetap_di_halaman_masuk(self):
+        respons = self.client.post("/laporan/masuk/", {"username": "staf", "password": "salah"})
+        self.assertEqual(respons.status_code, 200)
+
+    def test_keluar_lewat_post(self):
+        self.client.force_login(self.staf)
+        respons = self.client.post("/laporan/keluar/")
+        self.assertRedirects(respons, "/laporan/masuk/")

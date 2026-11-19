@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Laporan{% endblock %} - Koperasi Pinjaman</title>
+
   <style>
     :root { --bg:#f5f7fa; --kartu:#fff; --teks:#1f2937; --redup:#6b7280; --garis:#e5e7eb; --utama:#0f766e; --bahaya:#b91c1c; }
     * { box-sizing: border-box; }
@@ -33,17 +34,28 @@
     button { background:var(--utama); color:#fff; border:0; padding:8px 16px; border-radius:6px; cursor:pointer; }
     .lencana { padding:2px 8px; border-radius:999px; font-size:12px; background:#fef3c7; color:#92400e; }
     .lencana.macet { background:#fee2e2; color:#991b1b; }
+    header .kanan { margin-left:auto; display:flex; align-items:center; gap:12px; font-size:14px; padding:8px 0; }
+    header .kanan a { color:#e6fffa; }
+    header .kanan button { background:rgba(255,255,255,.18); padding:6px 12px; }
   </style>
 </head>
 <body>
-  <header>
+    <header>
     <strong>Koperasi Pinjaman</strong>
     <nav>
       <a href="{% url 'laporan:dashboard' %}" class="{% if halaman == 'dashboard' %}aktif{% endif %}">Dashboard</a>
       <a href="{% url 'laporan:tunggakan' %}" class="{% if halaman == 'tunggakan' %}aktif{% endif %}">Tunggakan</a>
       <a href="{% url 'laporan:kas' %}" class="{% if halaman == 'kas' %}aktif{% endif %}">Laporan Kas</a>
-      <a href="{% url 'admin:index' %}">Panel Admin</a>
+      <a href="{% url 'admin:index' %}">Panel Pengelola</a>
     </nav>
+    <div class="kanan">
+      <span>{{ request.user.username }}{% if request.user.is_superuser %} · Admin{% else %}{% for g in request.user.groups.all %} · {{ g.name }}{% endfor %}{% endif %}</span>
+      <a href="{% url 'admin:password_change' %}">Ganti sandi</a>
+      <form method="post" action="{% url 'laporan:keluar' %}">
+        {% csrf_token %}
+        <button type="submit">Keluar</button>
+      </form>
+    </div>
   </header>
   <main>
     {% block isi %}{% endblock %}

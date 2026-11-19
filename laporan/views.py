@@ -11,6 +11,7 @@ from pinjaman.models import JadwalAngsuran, PengajuanPinjaman, Pinjaman, Transak
 from pinjaman.services import hitung_denda, hitung_hari_telat, kolektibilitas
 
 NOL = Decimal("0")
+halaman_staf = staff_member_required(login_url="laporan:masuk")
 
 
 def _jumlah(queryset, ekspresi):
@@ -24,7 +25,7 @@ def _tanggal(teks, bawaan):
         return bawaan
 
 
-@staff_member_required
+@halaman_staf
 def dashboard(request):
     hari_ini = timezone.localdate()
     belum_bayar = JadwalAngsuran.objects.filter(status=JadwalAngsuran.Status.BELUM)
@@ -57,7 +58,7 @@ def dashboard(request):
     return render(request, "laporan/dashboard.html", konteks)
 
 
-@staff_member_required
+@halaman_staf
 def tunggakan(request):
     hari_ini = timezone.localdate()
     jadwal = JadwalAngsuran.objects.filter(
@@ -89,7 +90,7 @@ def tunggakan(request):
     )
 
 
-@staff_member_required
+@halaman_staf
 def laporan_kas(request):
     hari_ini = timezone.localdate()
     dari = _tanggal(request.GET.get("dari"), hari_ini.replace(day=1))
