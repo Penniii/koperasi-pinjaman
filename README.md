@@ -16,7 +16,7 @@ pembayaran dengan denda otomatis, buku kas, dan laporan. Dibuat sebagai proyek p
 - **Buku kas** yang hanya bisa bertambah (koreksi lewat transaksi baru), dengan saldo berjalan
 - **Dashboard dan laporan:** saldo kas, sisa pokok, tunggakan dengan tingkat kolektibilitas, kas per periode
 - **Data contoh** otomatis dengan satu perintah
-- **17 automated test** untuk perhitungan, alur pembayaran, hak akses, dan halaman laporan
+- **21 automated test** untuk perhitungan, alur pembayaran, hak akses, dan halaman laporan
 
 ## Peran
 
