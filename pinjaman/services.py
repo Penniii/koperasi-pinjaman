@@ -5,7 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 
-from .models import JadwalAngsuran, TransaksiKas
+from .models import JadwalAngsuran, PengajuanPinjaman, Pinjaman, TransaksiKas
 
 SEN = Decimal("0.01")
 
@@ -124,3 +124,25 @@ def kolektibilitas(hari_telat):
     if hari_telat <= 90:
         return "Kurang lancar"
     return "Macet"
+
+def cairkan_pengajuan(pengajuan, petugas, tanggal_cair):
+    """Mencairkan pengajuan yang sudah disetujui: buat pinjaman, jadwal angsuran, dan catat kas."""
+    with transaction.atomic():
+        jenis = pengajuan.jenis
+        pinjaman = Pinjaman.objects.create(
+            pengajuan=pengajuan,
+            tanggal_cair=tanggal_cair,
+            pokok=pengajuan.jumlah,
+            tenor_bulan=pengajuan.tenor_bulan,
+            bunga_per_bulan=jenis.bunga_per_bulan,
+            biaya_admin=(pengajuan.jumlah * jenis.biaya_admin_persen / 100).quantize(
+                SEN, ROUND_HALF_UP
+            ),
+            denda_per_hari_persen=jenis.denda_per_hari_persen,
+            dicairkan_oleh=petugas,
+        )
+        buat_jadwal_angsuran(pinjaman)
+        catat_kas_pencairan(pinjaman, petugas)
+        pengajuan.status = PengajuanPinjaman.Status.DICAIRKAN
+        pengajuan.save(update_fields=["status"])
+        return pinjaman
