@@ -78,7 +78,6 @@ python manage.py runserver
 ```
 
 Buka http://127.0.0.1:8000. Akun demo (hanya untuk uji coba): user `kasir` dan `pengurus`, password `demo12345`.
-user`Admin`,password `Password`
 
 Menjalankan test:`python manage.py test`
 
